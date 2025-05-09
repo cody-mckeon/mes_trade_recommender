@@ -28,21 +28,35 @@ def fetch_mes_data(access_token: str, symbol: str = "MESM5", interval: str = "1m
         "needExtendedHoursData": "false"
     }
 
+    print(f"📡 Requesting data for: {symbol}")
     response = requests.get(url, headers=headers, params=params)
     print(response.status_code)
 
     if response.status_code != 200:
         raise Exception(f"Schwab API error: {response.status_code} {response.text}")
 
-    data = response.json()
-    print(data.keys())
-    print(data.get("candles", [])[:2])
+    try:
+        data = response.json()
+    except Exception as e:
+        print("❌ Failed to parse JSON:", e)
+        print("Response content:", response.text[:300])
+        return None
 
-    # ✅ Check if 'candles' exists
     if "candles" not in data or not isinstance(data["candles"], list) or len(data["candles"]) == 0:
-        raise ValueError("No 'candles' key in Schwab response")
+        print("⚠️ No candles found in data.")
+        print("Raw data keys:", data.keys())
+        return None
+
+    print(f"✅ Received {len(data['candles'])} candles")
+    print("🕰 Sample candle:", data["candles"][0])
 
     df = pd.DataFrame(data["candles"])
+
+    if "datetime" not in df.columns:
+        print("❌ 'datetime' field not found in candles")
+        print("🧾 DataFrame columns:", df.columns.tolist())
+        return None
+
     df["datetime"] = pd.to_datetime(df["datetime"], unit="ms")
     df.set_index("datetime", inplace=True)
 

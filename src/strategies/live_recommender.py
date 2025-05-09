@@ -1,6 +1,10 @@
 # === live_recommender.py ===
 import numpy as np
 import pandas as pd
+from src.features.engineering import add_features
+from src.models.ml_models import train_random_forest_model
+from src.api.schwab_data import fetch_mes_data  # ✅ ADD THIS
+from src.config.strategy_params import best_strategy_params, best_rf_params
 
 class LiveTradeRecommender:
     def __init__(self, model, features, params, initial_capital=1000.0,

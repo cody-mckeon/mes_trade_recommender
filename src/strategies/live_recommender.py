@@ -73,3 +73,20 @@ class LiveTradeRecommender:
                 print(f"{k:>15}: {v}")
 
         return result
+        
+def run_live_signal(access_token, final_features, vix_data=None, verbose=True):
+    df = fetch_mes_data(access_token)
+    df = add_features(df)
+    model = train_random_forest_model(df, final_features, best_rf_params)
+    today_row = df.iloc[-1]
+
+    live_reco = LiveTradeRecommender(
+        model=model,
+        features=final_features,
+        params=best_strategy_params,
+        initial_capital=1000.0,
+        risk_fraction=0.02,
+        vix_data=vix_data
+    )
+
+    return live_reco.generate(today_row, verbose=verbose)

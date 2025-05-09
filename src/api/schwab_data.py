@@ -2,6 +2,30 @@ import requests
 import pandas as pd
 from datetime import datetime
 
+def get_futures_quote(access_token: str, symbol: str = "/MESM5") -> dict:
+    """
+    Get latest quote snapshot for a futures contract.
+    Schwab futures use a '/' prefix and month/year code (e.g., /MESM5).
+    """
+    url = "https://api.schwabapi.com/marketdata/v1/quotes"
+    headers = {
+        "Authorization": f"Bearer {access_token}"
+    }
+    params = {
+        "symbols": symbol
+    }
+
+    response = requests.get(url, headers=headers, params=params)
+    
+    if not response.ok:
+        raise Exception(f"Schwab API error: {response.status_code} - {response.text}")
+
+    data = response.json()
+    if symbol not in data:
+        raise ValueError(f"Symbol '{symbol}' not found in quote data.")
+
+    return data[symbol]
+
 def fetch_mes_data(access_token: str, symbol: str = "MESM5", interval: str = "1min", lookback_days: int = 5) -> pd.DataFrame:
     """
     Fetches historical MES futures data from Schwab Trader API.

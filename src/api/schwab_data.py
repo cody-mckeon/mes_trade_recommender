@@ -35,7 +35,8 @@ def fetch_mes_data(access_token: str, symbol: str = "MESM5", interval: str = "1m
 
     data = response.json()
 
-    if "candles" not in data:
+    # ✅ Check if 'candles' exists
+    if "candles" not in data or not isinstance(data["candles"], list) or len(data["candles"]) == 0:
         raise ValueError("No 'candles' key in Schwab response")
 
     df = pd.DataFrame(data["candles"])

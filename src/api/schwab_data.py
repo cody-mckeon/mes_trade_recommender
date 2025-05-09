@@ -29,11 +29,14 @@ def fetch_mes_data(access_token: str, symbol: str = "MESM5", interval: str = "1m
     }
 
     response = requests.get(url, headers=headers, params=params)
+    print(response.status_code)
 
     if response.status_code != 200:
         raise Exception(f"Schwab API error: {response.status_code} {response.text}")
 
     data = response.json()
+    print(data.keys())
+    print(data.get("candles", [])[:2])
 
     # ✅ Check if 'candles' exists
     if "candles" not in data or not isinstance(data["candles"], list) or len(data["candles"]) == 0:
